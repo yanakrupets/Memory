@@ -8,32 +8,33 @@ using System;
 
 public class SceneController : MonoBehaviour
 {
-    private const int gridRows = 3;
-    private int gridCols = 6;
-    public float offsetX = 2.2f;
-    private float offsetY = 1.8f;
-    private float offsetXTextfield = 1f;
-    private Sprite[] images;
-    private Dictionary<string, Sprite[]> imagesDictionary = new Dictionary<string, Sprite[]>();
-    private readonly string[] suit = new string[] { "B", "CH", "K", "P" };
-    private System.Random random = new System.Random();
-    private List<GameObject> players = new List<GameObject>();
+    private const int ROWS = 3;
+    private const float OFFSET_Y = 1.8f;
 
-    private int _score = 0;
+    private int _columns = 6;
+    private Sprite[] _images;
+    private System.Random _random = new System.Random();
+    private List<Player> _players = new List<Player>();
+
+    private Player _currentPlayer;
 
     private MemoryCard _firstRevealed;
     private MemoryCard _secondRevealed;
 
     [SerializeField] private MemoryCard originalCard;
     [SerializeField] private Text firstPlayerTextField;
-    [SerializeField] private GameObject firstPlayer;
+    [SerializeField] private Player firstPlayer;
     [SerializeField] private Sprite[] imagesB;
     [SerializeField] private Sprite[] imagesCH;
     [SerializeField] private Sprite[] imagesK;
     [SerializeField] private Sprite[] imagesP;
-    [SerializeField] private Text scoreLabel;
     [SerializeField] private Camera _camera;
     [SerializeField] private Transform canvas;
+
+    public delegate void Notify(Player player);
+    public event Notify OnScoreChanged;
+    public event Notify OnPlayerActivated;
+    public event Notify OnPlayerDeactivated;
 
     public bool canReveal
     {
@@ -42,110 +43,109 @@ public class SceneController : MonoBehaviour
 
     void Start()
     {
-        ////////////////////////////////////////////////////////////////////////////
-        offsetXTextfield = firstPlayerTextField.rectTransform.sizeDelta.x;
         for (int i = 0; i < GameSettings.PlayersCount; i++)
         {
-            Text playerTextField;
-            GameObject player;
-            if (i == 0)
-            {
-                playerTextField = firstPlayerTextField;
-
-                player = firstPlayer;
-                player.transform.name = GameSettings.PlayersNames[i];
-                var playerComponent = player.GetComponent<Player>();
-                playerComponent.isActive = true;
-                playerComponent.Name = GameSettings.PlayersNames[i];
-
-                players.Add(player);
-            }
-            else
-            {
-                playerTextField = Instantiate(firstPlayerTextField) as Text;
-
-                player = Instantiate(firstPlayer) as GameObject;
-                player.transform.name = GameSettings.PlayersNames[i];
-                var playerComponent = player.GetComponent<Player>();
-                playerComponent.isActive = true;
-                playerComponent.Name = GameSettings.PlayersNames[i];
-
-                players.Add(player);
-            }
-
-            playerTextField.transform.SetParent(canvas);
-            playerTextField.transform.name = players[i].GetComponent<Player>().Name;
-            playerTextField.text = players[i].GetComponent<Player>().Name + ": " + players[i].GetComponent<Player>().Score;
-
-            float posX = (offsetXTextfield * i) + firstPlayerTextField.transform.position.x;
-            float posY = firstPlayerTextField.transform.position.y;
-            float posZ = firstPlayerTextField.transform.position.z;
-            playerTextField.transform.position = new Vector3(posX, posY, posZ);
+            var player = CreatePlayer(i);
+            CreatePlayerTextField(player, i);
+            _players.Add(player);
         }
-        ////////////////////////////////////////////////////////////////////////////////
-        gridCols = (GameSettings.CardPairs * 2) / 3;
 
-        var h = _camera.orthographicSize * 2;
-        var w = h * _camera.aspect;
+        _currentPlayer = _players[0];
+        OnPlayerActivated(_currentPlayer);
 
-        // formulas for calculating the location of cards
-        var positionX = Math.Abs(originalCard.gameObject.transform.position.x);
-        var cardScale = originalCard.gameObject.transform.localScale.x;
-        offsetX = ((w - ((w / 2 - positionX) - cardScale / 2) * 2) - (gridCols * cardScale)) / (gridCols - 1) + cardScale;
+        _columns = (GameSettings.CardPairs * 2) / 3;
 
-        int[] numbers = new int[gridCols * gridRows];
-        var currentElement = 1;
-        for (int i = 2; i < numbers.Length; i++)
+        InitializeCards();
+    }
+
+    private void InitializeCards()
+    {
+        int[] cardIds = CreateCardIds();
+
+        _images = GetImagesList(GameSettings.CardPairs / 9);
+
+        cardIds = ShuffleArray(cardIds);
+
+        Vector3 startPosition = originalCard.transform.position;
+        var offsetX = CalculateOffsetX();
+        for (int i = 0; i < _columns; i++)
         {
-            numbers[i] = currentElement;
-            if (numbers[i] == numbers[i - 1])
+            for (int j = 0; j < ROWS; j++)
             {
-                currentElement++;
-            }
-        }
-        ///////////////////////////////////////////////////////////////////////////////////
-        images = GetImagesList(GameSettings.CardPairs / 9);
+                MemoryCard card = Instantiate(originalCard);
 
-        Vector3 startPos = originalCard.transform.position;
+                int id = cardIds[i * ROWS + j];
+                card.Initialize(id, _images[id]);
 
-        numbers = ShuffleArray(numbers);
-        var currentIndex = 0;
+                float posX = (offsetX * i) + startPosition.x;
+                float posY = -(OFFSET_Y * j) + startPosition.y;
+                card.transform.position = new Vector3(posX, posY, startPosition.z);
 
-        for (int i = 0; i < gridCols; i++)
-        {
-            for (int j = 0; j < gridRows; j++)
-            {
-                MemoryCard card;
-
-                if (i == 0 && j == 0)
-                {
-                    card = originalCard;
-                }
-                else
-                {
-                    card = Instantiate(originalCard) as MemoryCard;
-                }
-
-                int id = numbers[currentIndex];
-                card.SetCard(id, images[id]);
-                currentIndex++;
-
-                float posX = (offsetX * i) + startPos.x;
-                float posY = -(offsetY * j) + startPos.y;
-                card.transform.position = new Vector3(posX, posY, startPos.z);
+                card.gameObject.SetActive(true);
             }
         }
     }
 
+    private float CalculateOffsetX()
+    {
+        // formulas for calculating the location of cards
+        var cameraHeight = _camera.orthographicSize * 2;
+        var cameraWidth = cameraHeight * _camera.aspect;
+
+        var positionX = Math.Abs(originalCard.gameObject.transform.position.x);
+        var cardScale = originalCard.gameObject.transform.localScale.x;
+
+        return ((cameraWidth - ((cameraWidth / 2 - positionX) - cardScale / 2) * 2) -
+            (_columns * cardScale)) / (_columns - 1) + cardScale;
+    }
+
+    private Player CreatePlayer(int index)
+    {
+        var player = Instantiate(firstPlayer);
+        player.transform.name = GameSettings.PlayersNames[index];
+        player.Name = GameSettings.PlayersNames[index];
+        return player;
+    }
+
+    private void CreatePlayerTextField(Player player, int playerNumber)
+    {
+        var offsetXTextfield = firstPlayerTextField.rectTransform.sizeDelta.x;
+        var playerTextField = Instantiate(firstPlayerTextField);
+
+        playerTextField.transform.SetParent(canvas);
+        playerTextField.transform.name = player.Name;
+        playerTextField.text = player.Name + ": " + player.Score;
+
+        float posX = offsetXTextfield * playerNumber + firstPlayerTextField.transform.position.x;
+        float posY = firstPlayerTextField.transform.position.y;
+        float posZ = firstPlayerTextField.transform.position.z;
+        playerTextField.transform.position = new Vector3(posX, posY, posZ);
+
+        playerTextField.gameObject.SetActive(true);
+    }
+
+    private int[] CreateCardIds()
+    {
+        int[] cardIds = new int[_columns * ROWS];
+        for (int i = 0; i < cardIds.Length; i++)
+        {
+            cardIds[i] = i / 2;
+        }
+
+        return cardIds;
+    }
+
     public Sprite[] GetImagesList(int count)
     {
-        imagesDictionary = CreateImagesDictionary();
+        var imagesDictionary = CreateImagesDictionary();
+        var suit = new List<string> { "B", "CH", "K", "P" };
         Sprite[] imagesSprite = new Sprite[0];
         for (int i = 0; i < count; i++)
         {
-            var randomSuit = suit[random.Next(0, suit.Length)];
+            var randomSuit = suit[_random.Next(0, suit.Count)];
             var sprites = imagesDictionary[randomSuit];
             imagesDictionary.Remove(randomSuit);
+            suit.Remove(randomSuit);
             imagesSprite = imagesSprite.Concat(sprites).ToArray();
         }
 
@@ -177,13 +177,20 @@ public class SceneController : MonoBehaviour
 
     private IEnumerator CheckMatch()
     {
-        if (_firstRevealed.id == _secondRevealed.id)
+        if (_firstRevealed.Id == _secondRevealed.Id)
         {
-            _score++;
-            scoreLabel.text = "Score: " + _score;
+            _currentPlayer.UpdateScore();
+            OnScoreChanged(_currentPlayer);
         }
         else
         {
+            OnPlayerDeactivated(_currentPlayer);
+
+            var nextPlayerIndex = _players.IndexOf(_currentPlayer) + 1;
+            _currentPlayer = _players.ElementAtOrDefault(nextPlayerIndex) ?? _players[0];
+
+            OnPlayerActivated(_currentPlayer);
+
             yield return new WaitForSeconds(.5f);
 
             _firstRevealed.Unreveal();

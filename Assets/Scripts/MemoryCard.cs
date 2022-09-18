@@ -8,25 +8,29 @@ public class MemoryCard : MonoBehaviour
     [SerializeField] private SceneController controller;
 
     private int _id;
-    public int id
+    public int Id
     {
         get { return _id; }
     }
 
-    public void SetCard(int id, Sprite image)
+    public void Initialize(int id, Sprite image)
     {
         _id = id;
-        GetComponent<SpriteRenderer>().sprite = image;
-        cardBack.SetActive(true);
+        this.GetComponent<SpriteRenderer>().sprite = image;
     }
 
     public void OnMouseDown()
     {
         if (cardBack.activeSelf && controller.canReveal)
         {
-            cardBack.SetActive(false);
+            Reveal();
             controller.CardRevealed(this);
         }
+    }
+
+    public void Reveal()
+    {
+        cardBack.SetActive(false);
     }
 
     public void Unreveal()

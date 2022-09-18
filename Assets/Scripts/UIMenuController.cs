@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -15,38 +16,31 @@ public class UIMenuController : MonoBehaviour
     [SerializeField] private Canvas inputCanvas;
     [SerializeField] private InputField firstInput;
 
-    public const float offsetY = 42f;
+    private const float OFFSET_Y = 42f;
+    private const string COUNT_OF_PLAYERS = "Count of Players: ";
 
-    private List<string> inputFieldsNames = new List<string>();
+    private List<InputField> _inputFields = new List<InputField>();
 
     void Start()
     {
-        menuCanvas.gameObject.SetActive(true);
-        inputCanvas.gameObject.SetActive(false);
-
-        countOfPlayers.text = "Count of Players: " + slider.value;
-        slider.onValueChanged.AddListener(delegate { SliderValueChange(); });
+        countOfPlayers.text = COUNT_OF_PLAYERS + slider.value;
+        slider.onValueChanged.AddListener(delegate { HandleSliderValueChange(); });
     }
 
-    public void SliderValueChange()
+    public void HandleSliderValueChange()
     {
-        countOfPlayers.text = "Count of Players: " + slider.value;
+        countOfPlayers.text = COUNT_OF_PLAYERS + slider.value;
         GameSettings.PlayersCount = (int)slider.value;
     }
     
-    public void DropdownValueChange()
+    public void HandleDropdownValueChange()
     {
         GameSettings.CardPairs = Convert.ToInt32(dropdown.options[dropdown.value].text);
     }
 
-    public void SetPlayersNamesAndStartTheGame()
+    public void SetPlayersNames()
     {
-        foreach (var name in inputFieldsNames)
-        {
-            GameSettings.PlayersNames.Add(GameObject.Find(name).GetComponent<InputField>().text);
-        }
-
-        StartGame();
+        GameSettings.PlayersNames.AddRange(_inputFields.Select(field => field.text));
     }
 
     public void EnterPlayerNames()
@@ -54,37 +48,31 @@ public class UIMenuController : MonoBehaviour
         menuCanvas.gameObject.SetActive(false);
         inputCanvas.gameObject.SetActive(true);
 
-        Vector3 startPosition = firstInput.transform.position;
-
-        for (int i = 0; i < slider.value; i++)
+        for (int i = 1; i <= slider.value; i++)
         {
-            InputField inputField;
-
-            if (i == 0)
-            {
-                inputField = firstInput;
-            }
-            else
-            {
-                inputField = Instantiate(firstInput) as InputField;
-            }
-            //inputField.gameObject.SetActive(true);
-
-            inputField.transform.SetParent(inputCanvas.transform, false);
-            inputField.text = "Player " + (i + 1);
-            inputField.gameObject.name = "Player" + (i + 1) + "Inputfield";
-
-            inputFieldsNames.Add(inputField.gameObject.name);
-
-            float posX = firstInput.transform.position.x;
-            float posY = -(offsetY * i) + firstInput.transform.position.y;
-            float posZ = firstInput.transform.position.z;
-            inputField.transform.position = new Vector3(posX, posY, posZ);
+            SetUpInputField(i);
         }
+    }
+
+    private void SetUpInputField(int inputIndex)
+    {
+        InputField inputField = inputIndex == 1 ? firstInput : Instantiate(firstInput);
+
+        inputField.transform.SetParent(inputCanvas.transform, false);
+        inputField.text = "Player " + inputIndex;
+        inputField.gameObject.name = "Player" + inputIndex + "Inputfield";
+
+        float posX = firstInput.transform.position.x;
+        float posY = -(OFFSET_Y * (inputIndex - 1)) + firstInput.transform.position.y;
+        float posZ = firstInput.transform.position.z;
+        inputField.transform.position = new Vector3(posX, posY, posZ);
+
+        _inputFields.Add(inputField);
     }
 
     public void StartGame()
     {
+        SetPlayersNames();
         SceneManager.LoadScene("Game");
     }
 
