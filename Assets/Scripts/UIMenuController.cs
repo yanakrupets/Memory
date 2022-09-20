@@ -40,7 +40,7 @@ public class UIMenuController : MonoBehaviour
 
     public void SetPlayersNames()
     {
-        GameSettings.PlayersNames.AddRange(_inputFields.Select(field => field.text));
+        GameSettings.PlayersNames = new List<string>(_inputFields.Select(field => field.text));
     }
 
     public void EnterPlayerNames()

@@ -8,5 +8,5 @@ public static class GameSettings
 
     public static int PlayersCount { get; set; } = 2;
 
-    public static List<string> PlayersNames = new List<string>();
+    public static List<string> PlayersNames = new List<string>() { "Player 1", "Player 2" };
 }

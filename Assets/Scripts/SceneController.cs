@@ -11,6 +11,7 @@ public class SceneController : MonoBehaviour
     private const int ROWS = 3;
     private const float OFFSET_Y = 1.8f;
 
+    private int totalScore = 0;
     private int _columns = 6;
     private Sprite[] _images;
     private System.Random _random = new System.Random();
@@ -24,17 +25,18 @@ public class SceneController : MonoBehaviour
     [SerializeField] private MemoryCard originalCard;
     [SerializeField] private Text firstPlayerTextField;
     [SerializeField] private Player firstPlayer;
-    [SerializeField] private Sprite[] imagesB;
-    [SerializeField] private Sprite[] imagesCH;
-    [SerializeField] private Sprite[] imagesK;
-    [SerializeField] private Sprite[] imagesP;
+    [SerializeField] private Sprite[] imagesClubs;
+    [SerializeField] private Sprite[] imagesDiamonds;
+    [SerializeField] private Sprite[] imagesHearts;
+    [SerializeField] private Sprite[] imagesSpades;
     [SerializeField] private Camera _camera;
-    [SerializeField] private Transform canvas;
+    [SerializeField] private Transform gameCanvas;
 
     public delegate void Notify(Player player);
     public event Notify OnScoreChanged;
     public event Notify OnPlayerActivated;
     public event Notify OnPlayerDeactivated;
+    public event Notify OnPlayerWon;
 
     public bool canReveal
     {
@@ -112,7 +114,7 @@ public class SceneController : MonoBehaviour
         var offsetXTextfield = firstPlayerTextField.rectTransform.sizeDelta.x;
         var playerTextField = Instantiate(firstPlayerTextField);
 
-        playerTextField.transform.SetParent(canvas);
+        playerTextField.transform.SetParent(gameCanvas);
         playerTextField.transform.name = player.Name;
         playerTextField.text = player.Name + ": " + player.Score;
 
@@ -155,10 +157,10 @@ public class SceneController : MonoBehaviour
     public Dictionary<string, Sprite[]> CreateImagesDictionary()
     {
         return new Dictionary<string, Sprite[]>{
-            { "B", imagesB},
-            { "CH", imagesCH},
-            { "K", imagesK},
-            { "P", imagesP}
+            { "B", imagesClubs},
+            { "CH", imagesDiamonds},
+            { "K", imagesHearts},
+            { "P", imagesSpades}
         };
     }
 
@@ -181,6 +183,11 @@ public class SceneController : MonoBehaviour
         {
             _currentPlayer.UpdateScore();
             OnScoreChanged(_currentPlayer);
+            totalScore++;
+            if (totalScore == GameSettings.CardPairs)
+            {
+                OnPlayerWon(_players.SingleOrDefault(_ => _.Score == _players.Max(_ => _.Score)));
+            }
         }
         else
         {

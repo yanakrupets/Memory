@@ -7,15 +7,21 @@ using UnityEngine.UI;
 public class UIGameController : MonoBehaviour
 {
     [SerializeField] Canvas canvas;
+    //[SerializeField] Canvas canvasMenu;
+    [SerializeField] Text winnerTextField;
+    [SerializeField] ParticleSystem salut;
     [SerializeField] private SceneController sceneController;
     private readonly Color initialColor = Color.white;
     private readonly Color activatedColor = new Color(142 / 255f, 198 / 255f, 0);
+    [SerializeField] private Transform gameCanvas;
+    [SerializeField] private Transform menuCanvas;
 
     private void Awake()
     {
         sceneController.OnScoreChanged += UpdateScore;
         sceneController.OnPlayerActivated += ActivatePlayer;
         sceneController.OnPlayerDeactivated += DeactivatePlayer;
+        sceneController.OnPlayerWon += ShowWinner;
     }
 
     private void UpdateScore(Player player)
@@ -37,11 +43,30 @@ public class UIGameController : MonoBehaviour
         textField.color = initialColor;
     }
 
+    private void ShowWinner(Player player)
+    {
+        menuCanvas.gameObject.SetActive(true);
+        salut.Play(true);
+        winnerTextField.text = player.Name + " won !!!";
+        winnerTextField.gameObject.SetActive(true);
+    }
+
+    public void OpenMenuCanvas()
+    {
+        menuCanvas.gameObject.SetActive(true);
+        gameCanvas.gameObject.SetActive(false);
+    }
+
+    public void OpenMenu()
+    {
+        SceneManager.LoadScene("Menu");
+    }
+
     public void Restart()
     {
         SceneManager.LoadScene("Game");
     }
 
     private Text GetInputFieldTextComponent(string playerName) 
-        => canvas.transform.Find(playerName).GetComponent<Text>();
+        => gameCanvas.Find(playerName).GetComponent<Text>();
 }
