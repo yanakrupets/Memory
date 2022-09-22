@@ -6,6 +6,7 @@ public class MemoryCard : MonoBehaviour
 {
     [SerializeField] private GameObject cardBack;
     [SerializeField] private SceneController controller;
+    [SerializeField] private Transform parent;
 
     private int _id;
     public int Id
@@ -16,7 +17,8 @@ public class MemoryCard : MonoBehaviour
     public void Initialize(int id, Sprite image)
     {
         _id = id;
-        this.GetComponent<SpriteRenderer>().sprite = image;
+        GetComponent<SpriteRenderer>().sprite = image;
+        transform.SetParent(parent);
     }
 
     public void OnMouseDown()

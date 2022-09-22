@@ -7,7 +7,6 @@ using UnityEngine.UI;
 public class UIGameController : MonoBehaviour
 {
     [SerializeField] Canvas canvas;
-    //[SerializeField] Canvas canvasMenu;
     [SerializeField] Text winnerTextField;
     [SerializeField] ParticleSystem salut;
     [SerializeField] private SceneController sceneController;
@@ -15,6 +14,8 @@ public class UIGameController : MonoBehaviour
     private readonly Color activatedColor = new Color(142 / 255f, 198 / 255f, 0);
     [SerializeField] private Transform gameCanvas;
     [SerializeField] private Transform menuCanvas;
+    [SerializeField] private Transform cards;
+    [SerializeField] private Transform continueButton;
 
     private void Awake()
     {
@@ -46,15 +47,27 @@ public class UIGameController : MonoBehaviour
     private void ShowWinner(Player player)
     {
         menuCanvas.gameObject.SetActive(true);
+        cards.gameObject.SetActive(false);
         salut.Play(true);
         winnerTextField.text = player.Name + " won !!!";
+        winnerTextField.fontStyle = FontStyle.Bold;
         winnerTextField.gameObject.SetActive(true);
     }
 
     public void OpenMenuCanvas()
     {
         menuCanvas.gameObject.SetActive(true);
+        continueButton.gameObject.SetActive(true);
         gameCanvas.gameObject.SetActive(false);
+        cards.gameObject.SetActive(false);
+    }
+
+    public void CloseMenuCanvas()
+    {
+        continueButton.gameObject.SetActive(false);
+        menuCanvas.gameObject.SetActive(false);
+        gameCanvas.gameObject.SetActive(true);
+        cards.gameObject.SetActive(true);
     }
 
     public void OpenMenu()
