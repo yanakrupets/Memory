@@ -36,7 +36,9 @@ public class SceneController : MonoBehaviour
     public event Notify OnScoreChanged;
     public event Notify OnPlayerActivated;
     public event Notify OnPlayerDeactivated;
-    public event Notify OnPlayerWon;
+
+    public delegate void NotifyAboutWinners(List<Player> players);
+    public event NotifyAboutWinners OnPlayerWon;
 
     public bool canReveal
     {
@@ -186,7 +188,7 @@ public class SceneController : MonoBehaviour
             totalScore++;
             if (totalScore == GameSettings.CardPairs)
             {
-                OnPlayerWon(_players.SingleOrDefault(_ => _.Score == _players.Max(_ => _.Score)));
+                OnPlayerWon(_players.Select(player => player).Where(_ => _.Score == _players.Max(_ => _.Score)).ToList());
             }
         }
         else

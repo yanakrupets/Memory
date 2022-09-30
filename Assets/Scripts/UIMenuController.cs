@@ -10,13 +10,16 @@ using UnityEngine.UI;
 public class UIMenuController : MonoBehaviour
 {
     [SerializeField] private Text countOfPlayers;
+    [SerializeField] private Text errorMessageDuplicatedNames;
     [SerializeField] private Slider slider;
     [SerializeField] private TMP_Dropdown dropdown;
     [SerializeField] private Canvas menuCanvas;
     [SerializeField] private Canvas inputCanvas;
     [SerializeField] private InputField firstInput;
+    [SerializeField] private float inputOffsetY = 42f;
+    [SerializeField] private AudioSource buttonAS;
+    [SerializeField] private AudioSource errorAS;
 
-    private const float OFFSET_Y = 42f;
     private const string COUNT_OF_PLAYERS = "Count of Players: ";
 
     private List<InputField> _inputFields = new List<InputField>();
@@ -29,22 +32,33 @@ public class UIMenuController : MonoBehaviour
 
     public void HandleSliderValueChange()
     {
+        buttonAS.Play();
         countOfPlayers.text = COUNT_OF_PLAYERS + slider.value;
         GameSettings.PlayersCount = (int)slider.value;
     }
     
     public void HandleDropdownValueChange()
     {
+        buttonAS.Play();
         GameSettings.CardPairs = Convert.ToInt32(dropdown.options[dropdown.value].text);
     }
 
-    public void SetPlayersNames()
+    public bool TrySetPlayersNames()
     {
         GameSettings.PlayersNames = new List<string>(_inputFields.Select(field => field.text));
+        if (GameSettings.PlayersNames.Count != GameSettings.PlayersNames.Distinct().Count())
+        {
+            errorAS.Play();
+            errorMessageDuplicatedNames.gameObject.SetActive(true);
+            return false;
+        }
+        return true;
     }
 
     public void EnterPlayerNames()
     {
+        buttonAS.Play();
+
         menuCanvas.gameObject.SetActive(false);
         inputCanvas.gameObject.SetActive(true);
 
@@ -52,6 +66,14 @@ public class UIMenuController : MonoBehaviour
         {
             SetUpInputField(i);
         }
+    }
+
+    public void CloseInputCanvas()
+    {
+        buttonAS.Play();
+
+        menuCanvas.gameObject.SetActive(true);
+        inputCanvas.gameObject.SetActive(false);
     }
 
     private void SetUpInputField(int inputIndex)
@@ -63,21 +85,31 @@ public class UIMenuController : MonoBehaviour
         inputField.gameObject.name = "Player" + inputIndex + "Inputfield";
 
         float posX = firstInput.transform.position.x;
-        float posY = -(OFFSET_Y * (inputIndex - 1)) + firstInput.transform.position.y;
+        float posY = -(inputOffsetY * (inputIndex - 1)) + firstInput.transform.position.y;
         float posZ = firstInput.transform.position.z;
         inputField.transform.position = new Vector3(posX, posY, posZ);
 
         _inputFields.Add(inputField);
     }
 
+    public void OpenSettingCanvas()
+    {
+        buttonAS.Play();
+    }
+
     public void StartGame()
     {
-        SetPlayersNames();
-        SceneManager.LoadScene("Game");
+        buttonAS.Play();
+
+        if (TrySetPlayersNames())
+        {
+            SceneManager.LoadScene("Game");
+        }
     }
 
     public void QuitGame()
     {
+        buttonAS.Play();
         Application.Quit();
     }
 }

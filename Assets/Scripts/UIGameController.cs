@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.Text;
 
 public class UIGameController : MonoBehaviour
 {
@@ -16,6 +17,8 @@ public class UIGameController : MonoBehaviour
     [SerializeField] private Transform menuCanvas;
     [SerializeField] private Transform cards;
     [SerializeField] private Transform continueButton;
+    [SerializeField] private AudioSource buttonAS;
+    [SerializeField] private AudioSource wonAS;
 
     private void Awake()
     {
@@ -44,18 +47,27 @@ public class UIGameController : MonoBehaviour
         textField.color = initialColor;
     }
 
-    private void ShowWinner(Player player)
+    private void ShowWinner(List<Player> players)
     {
+        wonAS.Play();
         menuCanvas.gameObject.SetActive(true);
         cards.gameObject.SetActive(false);
+        continueButton.gameObject.SetActive(false);
         salut.Play(true);
-        winnerTextField.text = player.Name + " won !!!";
+        StringBuilder sb = new StringBuilder();
+        foreach (var player in players)
+        {
+            sb.Append(player.Name + ", ");
+        }
+        sb.Remove(sb.Length - 2, 2);
+        winnerTextField.text = sb + " won !!!";
         winnerTextField.fontStyle = FontStyle.Bold;
         winnerTextField.gameObject.SetActive(true);
     }
 
     public void OpenMenuCanvas()
     {
+        buttonAS.Play();
         menuCanvas.gameObject.SetActive(true);
         continueButton.gameObject.SetActive(true);
         gameCanvas.gameObject.SetActive(false);
@@ -64,19 +76,25 @@ public class UIGameController : MonoBehaviour
 
     public void CloseMenuCanvas()
     {
+        buttonAS.Play();
         continueButton.gameObject.SetActive(false);
         menuCanvas.gameObject.SetActive(false);
         gameCanvas.gameObject.SetActive(true);
         cards.gameObject.SetActive(true);
     }
 
+    public void PlaySound(AudioSource audioSource) =>
+        audioSource.Play();
+
     public void OpenMenu()
     {
+        buttonAS.Play();
         SceneManager.LoadScene("Menu");
     }
 
     public void Restart()
     {
+        buttonAS.Play();
         SceneManager.LoadScene("Game");
     }
 
