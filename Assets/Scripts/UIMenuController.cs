@@ -15,6 +15,7 @@ public class UIMenuController : MonoBehaviour
     [SerializeField] private TMP_Dropdown dropdown;
     [SerializeField] private Canvas menuCanvas;
     [SerializeField] private Canvas inputCanvas;
+    [SerializeField] private Canvas settingsCanvas;
     [SerializeField] private InputField firstInput;
     [SerializeField] private float inputOffsetY = 42f;
     [SerializeField] private AudioSource buttonAS;
@@ -62,18 +63,20 @@ public class UIMenuController : MonoBehaviour
         menuCanvas.gameObject.SetActive(false);
         inputCanvas.gameObject.SetActive(true);
 
+        _inputFields = new List<InputField>();
         for (int i = 1; i <= slider.value; i++)
         {
             SetUpInputField(i);
         }
     }
 
-    public void CloseInputCanvas()
+    public void OpenMenuCanvas()
     {
         buttonAS.Play();
 
         menuCanvas.gameObject.SetActive(true);
         inputCanvas.gameObject.SetActive(false);
+        settingsCanvas.gameObject.SetActive(false);
     }
 
     private void SetUpInputField(int inputIndex)
@@ -95,6 +98,9 @@ public class UIMenuController : MonoBehaviour
     public void OpenSettingCanvas()
     {
         buttonAS.Play();
+
+        menuCanvas.gameObject.SetActive(false);
+        settingsCanvas.gameObject.SetActive(true);
     }
 
     public void StartGame()
