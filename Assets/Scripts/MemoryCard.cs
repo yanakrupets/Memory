@@ -8,12 +8,17 @@ public class MemoryCard : MonoBehaviour, IPointerDownHandler
     [SerializeField] private GameObject cardBack;
     [SerializeField] private SceneController controller;
     [SerializeField] private Transform parent;
-    [SerializeField] private AudioSource cardSound;
+    private SoundManager soundAudioSource;
 
     private int _id;
     public int Id
     {
         get { return _id; }
+    }
+
+    public void Start()
+    {
+        soundAudioSource = GameObject.Find("Audio Sources").transform.Find("Sound Source").GetComponent<SoundManager>();
     }
 
     public void Initialize(int id, Sprite image)
@@ -25,6 +30,7 @@ public class MemoryCard : MonoBehaviour, IPointerDownHandler
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        soundAudioSource.PlayReverbSound();
         if (cardBack.activeSelf && controller.canReveal)
         {
             Reveal();
@@ -34,7 +40,6 @@ public class MemoryCard : MonoBehaviour, IPointerDownHandler
 
     public void Reveal()
     {
-        cardSound.Play();
         cardBack.SetActive(false);
     }
 

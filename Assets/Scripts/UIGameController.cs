@@ -17,8 +17,7 @@ public class UIGameController : MonoBehaviour
     [SerializeField] private Transform menuCanvas;
     [SerializeField] private Transform cards;
     [SerializeField] private Transform continueButton;
-    [SerializeField] private AudioSource buttonAS;
-    [SerializeField] private AudioSource wonAS;
+    private SoundManager soundAudioSource;
 
     private void Awake()
     {
@@ -26,6 +25,11 @@ public class UIGameController : MonoBehaviour
         sceneController.OnPlayerActivated += ActivatePlayer;
         sceneController.OnPlayerDeactivated += DeactivatePlayer;
         sceneController.OnPlayerWon += ShowWinner;
+    }
+
+    public void Start()
+    {
+        soundAudioSource = GameObject.Find("Audio Sources").transform.Find("Sound Source").GetComponent<SoundManager>();
     }
 
     private void UpdateScore(Player player)
@@ -49,7 +53,8 @@ public class UIGameController : MonoBehaviour
 
     private void ShowWinner(List<Player> players)
     {
-        wonAS.Play();
+        soundAudioSource.PlayWonSound();
+
         menuCanvas.gameObject.SetActive(true);
         cards.gameObject.SetActive(false);
         continueButton.gameObject.SetActive(false);
@@ -67,7 +72,8 @@ public class UIGameController : MonoBehaviour
 
     public void OpenMenuCanvas()
     {
-        buttonAS.Play();
+        soundAudioSource.PlayButtonSound();
+
         menuCanvas.gameObject.SetActive(true);
         continueButton.gameObject.SetActive(true);
         gameCanvas.gameObject.SetActive(false);
@@ -76,25 +82,23 @@ public class UIGameController : MonoBehaviour
 
     public void CloseMenuCanvas()
     {
-        buttonAS.Play();
+        soundAudioSource.PlayButtonSound();
+
         continueButton.gameObject.SetActive(false);
         menuCanvas.gameObject.SetActive(false);
         gameCanvas.gameObject.SetActive(true);
         cards.gameObject.SetActive(true);
     }
 
-    public void PlaySound(AudioSource audioSource) =>
-        audioSource.Play();
-
     public void OpenMenu()
     {
-        buttonAS.Play();
+        soundAudioSource.PlayButtonSound();
         SceneManager.LoadScene("Menu");
     }
 
     public void Restart()
     {
-        buttonAS.Play();
+        soundAudioSource.PlayButtonSound();
         SceneManager.LoadScene("Game");
     }
 

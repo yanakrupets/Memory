@@ -31,6 +31,7 @@ public class SceneController : MonoBehaviour
     [SerializeField] private Sprite[] imagesSpades;
     [SerializeField] private Camera _camera;
     [SerializeField] private Transform gameCanvas;
+    private MusicManager musicAudioSource;
 
     public delegate void Notify(Player player);
     public event Notify OnScoreChanged;
@@ -47,6 +48,9 @@ public class SceneController : MonoBehaviour
 
     void Start()
     {
+        musicAudioSource = GameObject.Find("Audio Sources").transform.Find("Music Source").GetComponent<MusicManager>();
+        musicAudioSource.StopPlaying();
+
         for (int i = 0; i < GameSettings.PlayersCount; i++)
         {
             var player = CreatePlayer(i);
