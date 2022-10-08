@@ -12,7 +12,7 @@ public class MusicManager : MonoBehaviour
 
     private void Start()
     {
-        musicAudioSource.volume = 1;
+        musicAudioSource.volume = PlayerPrefs.GetFloat("MusicVolume", 10) / 10;
     }
 
     public void PlayBackgroundMusic()

@@ -347,7 +347,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af780472cb44e3f4684afa8018dc10a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  brightness: {fileID: 11400000, guid: 8c149f9bc797c9845998681e01f82298, type: 2}
+  profile: {fileID: 11400000, guid: 8c149f9bc797c9845998681e01f82298, type: 2}
   layer: {fileID: 633714302}
 --- !u!114 &284749094
 MonoBehaviour:

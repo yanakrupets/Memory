@@ -15,7 +15,7 @@ public class SoundManager : MonoBehaviour
 
     private void Start()
     {
-        soundAudioSource.volume = 1;
+        soundAudioSource.volume = PlayerPrefs.GetFloat("SoundVolume", 10) / 10;
     }
 
     public void PlayButtonSound()

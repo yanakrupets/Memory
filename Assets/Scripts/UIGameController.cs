@@ -4,19 +4,22 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using System.Text;
+using System.Linq;
+using System;
 
 public class UIGameController : MonoBehaviour
 {
-    [SerializeField] Canvas canvas;
-    [SerializeField] Text winnerTextField;
-    [SerializeField] ParticleSystem salut;
+    [SerializeField] private Text winnerTextField;
+    [SerializeField] private ParticleSystem salut;
     [SerializeField] private SceneController sceneController;
-    private readonly Color initialColor = Color.white;
-    private readonly Color activatedColor = new Color(142 / 255f, 198 / 255f, 0);
+
     [SerializeField] private Transform gameCanvas;
     [SerializeField] private Transform menuCanvas;
     [SerializeField] private Transform cards;
     [SerializeField] private Transform continueButton;
+
+    private readonly Color initialColor = Color.white;
+    private readonly Color activatedColor = new Color(142 / 255f, 198 / 255f, 0);
     private SoundManager soundAudioSource;
 
     private void Awake()
@@ -59,13 +62,7 @@ public class UIGameController : MonoBehaviour
         cards.gameObject.SetActive(false);
         continueButton.gameObject.SetActive(false);
         salut.Play(true);
-        StringBuilder sb = new StringBuilder();
-        foreach (var player in players)
-        {
-            sb.Append(player.Name + ", ");
-        }
-        sb.Remove(sb.Length - 2, 2);
-        winnerTextField.text = sb + " won !!!";
+        winnerTextField.text = String.Join(", ", players.Select(p => p.Name)) + " won !!!";
         winnerTextField.fontStyle = FontStyle.Bold;
         winnerTextField.gameObject.SetActive(true);
     }

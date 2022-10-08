@@ -11,7 +11,7 @@ public class UIMenuController : MonoBehaviour
 {
     [SerializeField] private Text countOfPlayers;
     [SerializeField] private Text errorMessageDuplicatedNames;
-    [SerializeField] private Slider slider;
+    [SerializeField] private Slider CountOfPlayersSlider;
     [SerializeField] private TMP_Dropdown dropdown;
     [SerializeField] private List<InputField> inputFields;
 
@@ -23,7 +23,6 @@ public class UIMenuController : MonoBehaviour
     [SerializeField] private Canvas inputCanvas;
     [SerializeField] private Canvas settingsCanvas;
 
-    //[SerializeField] private float inputOffsetY = 42f;
     private MusicManager musicAudioSource;
     private SoundManager soundAudioSource;
     private Brightness brightness;
@@ -40,15 +39,15 @@ public class UIMenuController : MonoBehaviour
 
         SetDefaultSlidersValues();
 
-        countOfPlayers.text = COUNT_OF_PLAYERS + slider.value;
-        slider.onValueChanged.AddListener(delegate { HandleSliderValueChange(); });
+        countOfPlayers.text = COUNT_OF_PLAYERS + CountOfPlayersSlider.value;
+        CountOfPlayersSlider.onValueChanged.AddListener(delegate { HandleSliderValueChange(); });
     }
 
     public void HandleSliderValueChange()
     {
         soundAudioSource.PlayButtonSound();
-        countOfPlayers.text = COUNT_OF_PLAYERS + slider.value;
-        GameSettings.PlayersCount = (int)slider.value;
+        countOfPlayers.text = COUNT_OF_PLAYERS + CountOfPlayersSlider.value;
+        GameSettings.PlayersCount = (int)CountOfPlayersSlider.value;
     }
     
     public void HandleDropdownValueChange()
@@ -57,14 +56,9 @@ public class UIMenuController : MonoBehaviour
         GameSettings.CardPairs = Convert.ToInt32(dropdown.options[dropdown.value].text);
     }
 
-    public void PlayEnterSound()
+    public void HandleInputValueChange()
     {
         soundAudioSource.PlayEnterSound();
-    }
-
-    public void PlaySliderSound()
-    {
-        soundAudioSource.PlayButtonSound();
     }
 
     public void ChangeSoundVolume(float value)
@@ -114,7 +108,7 @@ public class UIMenuController : MonoBehaviour
         var countIF = 1;
         foreach (var inputField in inputFields)
         {
-            if (countIF <= slider.value)
+            if (countIF <= CountOfPlayersSlider.value)
             {
                 inputField.gameObject.SetActive(true);
             }

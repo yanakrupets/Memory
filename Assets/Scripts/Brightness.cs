@@ -6,15 +6,15 @@ using UnityEngine.Rendering.PostProcessing;
 
 public class Brightness : MonoBehaviour
 {
-    [SerializeField] private PostProcessProfile brightness;
+    [SerializeField] private PostProcessProfile profile;
     [SerializeField] private PostProcessLayer layer;
 
     private AutoExposure exposure;
 
     void Start()
     {
-        brightness.TryGetSettings(out exposure);
-        exposure.keyValue.value = 1;
+        profile.TryGetSettings(out exposure);
+        exposure.keyValue.value = PlayerPrefs.GetFloat("Brightness", 10) / 10;
     }
 
     public void AdjustBrightness(float value)

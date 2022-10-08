@@ -30,7 +30,6 @@ public class MemoryCard : MonoBehaviour, IPointerDownHandler
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        soundAudioSource.PlayReverbSound();
         if (cardBack.activeSelf && controller.canReveal)
         {
             Reveal();
@@ -40,6 +39,7 @@ public class MemoryCard : MonoBehaviour, IPointerDownHandler
 
     public void Reveal()
     {
+        soundAudioSource.PlayReverbSound();
         cardBack.SetActive(false);
     }
 

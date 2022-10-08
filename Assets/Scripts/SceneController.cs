@@ -8,6 +8,17 @@ using System;
 
 public class SceneController : MonoBehaviour
 {
+    [SerializeField] private MemoryCard originalCard;
+    [SerializeField] private Text firstPlayerTextField;
+    [SerializeField] private Player firstPlayer;
+    [SerializeField] private Camera _camera;
+    [SerializeField] private Transform gameCanvas;
+
+    [SerializeField] private Sprite[] imagesClubs;
+    [SerializeField] private Sprite[] imagesDiamonds;
+    [SerializeField] private Sprite[] imagesHearts;
+    [SerializeField] private Sprite[] imagesSpades;
+
     private const int ROWS = 3;
     private const float OFFSET_Y = 1.8f;
 
@@ -22,15 +33,6 @@ public class SceneController : MonoBehaviour
     private MemoryCard _firstRevealed;
     private MemoryCard _secondRevealed;
 
-    [SerializeField] private MemoryCard originalCard;
-    [SerializeField] private Text firstPlayerTextField;
-    [SerializeField] private Player firstPlayer;
-    [SerializeField] private Sprite[] imagesClubs;
-    [SerializeField] private Sprite[] imagesDiamonds;
-    [SerializeField] private Sprite[] imagesHearts;
-    [SerializeField] private Sprite[] imagesSpades;
-    [SerializeField] private Camera _camera;
-    [SerializeField] private Transform gameCanvas;
     private MusicManager musicAudioSource;
 
     public delegate void Notify(Player player);
@@ -48,6 +50,7 @@ public class SceneController : MonoBehaviour
 
     void Start()
     {
+        _camera = GameObject.Find("Main Camera").GetComponent<Camera>();
         musicAudioSource = GameObject.Find("Audio Sources").transform.Find("Music Source").GetComponent<MusicManager>();
         musicAudioSource.StopPlaying();
 
